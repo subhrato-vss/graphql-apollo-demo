@@ -1,11 +1,16 @@
 import express from "express";
 import cors from "cors";
+
+// Import ApolloServer (GraphQL server)
 import { ApolloServer } from "@apollo/server";
+
+// Middleware to connect Apollo Server with Express (Express v5 compatible)
 import { expressMiddleware } from "@as-integrations/express5";
 
 // ----------------------
-// GraphQL Schema
+// GraphQL Schema (API structure)
 // ----------------------
+// typeDefs define WHAT data can be queried
 const typeDefs = `#graphql
   type Query {
     hello: String
@@ -13,10 +18,12 @@ const typeDefs = `#graphql
 `;
 
 // ----------------------
-// Resolvers (logic)
+// Resolvers (Business logic)
 // ----------------------
+// Resolvers define HOW data is returned for each query
 const resolvers = {
     Query: {
+        // Resolver for "hello" query
         hello: () => {
             return "Hello from GraphQL Server 🚀";
         },
@@ -24,24 +31,31 @@ const resolvers = {
 };
 
 // ----------------------
-// Server setup
+// Apollo Server Setup
 // ----------------------
+// Create Apollo GraphQL server with schema & resolvers
 const server = new ApolloServer({
     typeDefs,
     resolvers,
 });
 
+// Start Apollo Server (required before applying middleware)
 await server.start();
 
+// ----------------------
+// Express App Setup
+// ----------------------
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
+// Attach Apollo GraphQL middleware to Express
+// All GraphQL requests will go through /graphql
 app.use("/graphql", expressMiddleware(server));
 
 // ----------------------
-// LIsten Server
+// Start HTTP Server
 // ----------------------
 const PORT = 5000;
 app.listen(PORT, () => {
